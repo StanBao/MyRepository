@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!--namespace属性用于指定当前的映射文件与哪个接口进行映射  需要制定接口的完整路径-->
+<mapper namespace="com.by.store.mapper.UserMapper">
+    <!--  自定义映射规则  resultMap
+      id属性 对应的就是resultMAP=""的值
+      type属性 取值是一个类  表示查询结果与哪个实体类进行映射-->
+    <resultMap id="UserEntityMap" type="com.by.store.entity.User">
+        <!-- 定义映射时  主键不可以省略  必须有       -->
+        <id column="uid" property="uid"></id>
+        <result column="is_delete" property="isDelete"></result>
+        <result column="created_user" property="createdUser"></result>
+        <result column="created_time" property="createdTime"></result>
+        <result column="modified_user" property="modifiedUser"></result>
+        <result column="modified_time" property="modifiedTime"></result>
+    </resultMap>
+
+    <!--    id属性表示映射的接口中方法的名称  在标签内写sql文-->
+    <!--
+          useGeneratedKeys 表示开启某字段自增
+            keyproperty标记哪个字段自增
+     -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="uid">
+        insert into store.t_user(username, password, salt, phone, email, gender, avatar, is_delete,
+                                 created_user, created_time, modified_user, modified_time)
+        values (#{username}, #{password}, #{salt}, #{phone}, #{email}, #{gender}, #{avatar}, #{isDelete},
+                #{createdUser}, #{createdTime}, #{modifiedUser}, #{modifiedTime})
+    </insert>
+
+
+    <!--  select在执行时 要么查单个   要么查多个
+         resuleType 表示查询的结果集类型 只需要指定对应类的类型  包含完整包接口  resultType="com.by.store.entity.User"
+                    但是user类里的属性是驼峰命名    表里的字段是下划线命名   不能一一对应上
+         resultMap  当字段和属性不一致时，用来自定义结果集的映射规则
+         -->
+    <select id="findByUsername" resultMap="UserEntityMap">
+        select *
+        from store.t_user
+        where username = #{username}
+    </select>
+
+    <update id="updatePasswordByUidInteger">
+        update store.t_user
+        set password      = #{password},
+            modified_user = #{modifiedUser},
+            modified_time =#{modifiedTime}
+        where uid = #{uid}
+    </update>
+
+    <select id="findByUid" resultMap="UserEntityMap">
+        select *
+        from store.t_user
+        where uid = #{uid}
+    </select>
+
+    <update id="updateInfoByUid">
+        update store.t_user set
+        # if 标签 test是判断条件 如果是true 执行if标签内语句
+        <if test="phone != null">phone = #{phone},</if>
+        <if test="email != null">email = #{email},</if>
+        <if test="gender != null">gender = #{gender},</if>
+        modified_user = #{modifiedUser},
+        modified_time = #{modifiedTime}
+        where uid = #{uid}
+    </update>
+
+
+    <update id="updateAvatarByUid">
+        update store.t_user
+        set avatar        = #{avatar},
+            modified_user = #{modifiedUser},
+            modified_time = #{modifiedTime}
+        where uid = #{uid}
+    </update>
+
+
+</mapper>
